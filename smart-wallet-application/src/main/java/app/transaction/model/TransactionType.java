@@ -1,4 +1,4 @@
-package app.transaction;
+package app.transaction.model;
 
 public enum TransactionType {
 
