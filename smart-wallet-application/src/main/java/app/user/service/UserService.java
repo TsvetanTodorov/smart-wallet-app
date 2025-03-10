@@ -6,7 +6,9 @@ import app.user.model.User;
 import app.user.model.UserRole;
 import app.user.repository.UserRepository;
 import app.wallet.service.WalletService;
+import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,14 +38,31 @@ public class UserService {
         this.walletService = walletService;
     }
 
+    public User login(LoginRequest loginRequest) {
+
+        Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
+
+        if(optionalUser.isPresent()) {
+            throw new DomainException("Username or password is incorrect.");
+        }
+
+        User user = optionalUser.get();
+        if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+            throw new DomainException("Username or password is incorrect.");
+        }
+
+        return user;
+    }
+
+    @Transactional
     public User register(RegisterRequest registerRequest){
 
-        Optional<User> userOptional = userRepository.findByUsername(registerRequest.getUsername());
-        if(userOptional.isPresent()){
+        Optional<User> optionalUser = userRepository.findByUsername(registerRequest.getUsername());
+        if(optionalUser.isPresent()){
             throw new DomainException("Username [%s] already exist.".formatted(registerRequest.getUsername()));
         }
 
-        User user = userRepository.save(initilizeUser(registerRequest));
+        User user = userRepository.save(initializeUser(registerRequest));
 
         subscriptionService.createDefaultSubscription(user);
         walletService.createNewWallet(user);
@@ -54,7 +73,7 @@ public class UserService {
     }
 
 
-    private User initilizeUser(RegisterRequest registerRequest){
+    private User initializeUser(RegisterRequest registerRequest){
 
         return   User.builder()
                 .username(registerRequest.getUsername())
