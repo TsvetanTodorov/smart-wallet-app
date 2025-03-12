@@ -29,7 +29,7 @@ public class SubscriptionService {
         Subscription subscription = subscriptionRepository.save(initializeSubscription(user));
 
         log.info("Successfully created new subscription with id [%s] and type [%s]."
-                .formatted(subscription.getId(), subscription.getSubscriptionType()));
+                .formatted(subscription.getId(), subscription.getType()));
     }
 
     private Subscription initializeSubscription(User user){
@@ -38,9 +38,9 @@ public class SubscriptionService {
 
         return Subscription.builder()
                 .owner(user)
-                .subscriptionStatus(SubscriptionStatus.ACTIVE)
-                .subscriptionPeriod(SubscriptionPeriod.MONTHLY)
-                .subscriptionType(SubscriptionType.DEFAULT)
+                .status(SubscriptionStatus.ACTIVE)
+                .period(SubscriptionPeriod.MONTHLY)
+                .type(SubscriptionType.DEFAULT)
                 .price(new BigDecimal("0.00"))
                 .renewalAllowed(true)
                 .createdOn(now)

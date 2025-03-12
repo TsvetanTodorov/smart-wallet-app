@@ -26,7 +26,7 @@ public class Wallet {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private WalletStatus walletStatus;
+    private WalletStatus status;
 
     @Column(nullable = false)
     private BigDecimal balance;

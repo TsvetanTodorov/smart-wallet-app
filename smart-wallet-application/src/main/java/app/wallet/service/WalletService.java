@@ -50,7 +50,7 @@ public class WalletService {
 
         String transactionDescription = "Top up %.2f".formatted(amount.doubleValue());
 
-        if(wallet.getWalletStatus() == WalletStatus.INACTIVE){
+        if(wallet.getStatus() == WalletStatus.INACTIVE){
             return transactionService.createNewTransaction(wallet.getOwner(),
                     SMART_WALLET_SENDER,
                     walletId.toString(),
@@ -88,7 +88,7 @@ public class WalletService {
     private Wallet initializeWallet(User user) {
         return Wallet.builder()
                 .owner(user)
-                .walletStatus(WalletStatus.ACTIVE)
+                .status(WalletStatus.ACTIVE)
                 .balance(new BigDecimal("20.00"))
                 .currency(Currency.getInstance("EUR"))
                 .createdOn(LocalDateTime.now())

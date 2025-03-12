@@ -25,15 +25,15 @@ public class Subscription {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private SubscriptionStatus subscriptionStatus;
+    private SubscriptionStatus status;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private SubscriptionPeriod subscriptionPeriod;
+    private SubscriptionPeriod period;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private SubscriptionType subscriptionType;
+    private SubscriptionType type;
 
     @Column(nullable = false)
     private BigDecimal price;

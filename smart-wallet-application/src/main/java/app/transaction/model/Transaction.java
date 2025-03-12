@@ -41,11 +41,11 @@ public class Transaction {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TransactionType transactionType;
+    private TransactionType type;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private TransactionStatus transactionStatus;
+    private TransactionStatus status;
 
     @Column(nullable = false)
     private String description;
