@@ -25,9 +25,9 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ModelAndView getAllTransactions(){
+    public ModelAndView getAllTransactions() {
 
-        List<Transaction> transactions = transactionService.getAllByOwnerId(UUID.fromString("fc815143-d8a2-41d2-b1d3-8fff90dede74"));
+        List<Transaction> transactions = transactionService.getAllByOwnerId(UUID.fromString("882f7b7d-52c6-4f42-858c-9ac34bcf23ea"));
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("transactions");
         modelAndView.addObject("transactions", transactions);

@@ -35,22 +35,23 @@ public class WalletService {
     }
 
 
-    public void createNewWallet(User user){
+    public Wallet createNewWallet(User user) {
 
         Wallet wallet = walletRepository.save(initializeWallet(user));
 
-        log.info("Successfully created new wallet with id [%s] and balance [%.2f].".formatted( wallet.getId(), wallet.getBalance()));
+        log.info("Successfully created new wallet with id [%s] and balance [%.2f].".formatted(wallet.getId(), wallet.getBalance()));
 
+        return wallet;
     }
 
     @Transactional
-    public Transaction topUp(UUID walletId, BigDecimal amount){
+    public Transaction topUp(UUID walletId, BigDecimal amount) {
 
         Wallet wallet = getWalletById(walletId);
 
         String transactionDescription = "Top up %.2f".formatted(amount.doubleValue());
 
-        if(wallet.getStatus() == WalletStatus.INACTIVE){
+        if (wallet.getStatus() == WalletStatus.INACTIVE) {
             return transactionService.createNewTransaction(wallet.getOwner(),
                     SMART_WALLET_SENDER,
                     walletId.toString(),

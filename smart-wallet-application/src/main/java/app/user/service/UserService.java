@@ -1,10 +1,12 @@
 package app.user.service;
 
 import app.exception.DomainException;
+import app.subscription.model.Subscription;
 import app.subscription.service.SubscriptionService;
 import app.user.model.User;
 import app.user.model.UserRole;
 import app.user.repository.UserRepository;
+import app.wallet.model.Wallet;
 import app.wallet.service.WalletService;
 import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
@@ -28,7 +30,7 @@ public class UserService {
     private final SubscriptionService subscriptionService;
     private final WalletService walletService;
 
-@Autowired
+    @Autowired
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        SubscriptionService subscriptionService,
@@ -44,12 +46,12 @@ public class UserService {
 
         Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
 
-        if(optionalUser.isPresent()) {
+        if (optionalUser.isPresent()) {
             throw new DomainException("Username or password is incorrect.");
         }
 
         User user = optionalUser.get();
-        if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new DomainException("Username or password is incorrect.");
         }
 
@@ -57,17 +59,20 @@ public class UserService {
     }
 
     @Transactional
-    public User register(RegisterRequest registerRequest){
+    public User register(RegisterRequest registerRequest) {
 
         Optional<User> optionalUser = userRepository.findByUsername(registerRequest.getUsername());
-        if(optionalUser.isPresent()){
+        if (optionalUser.isPresent()) {
             throw new DomainException("Username [%s] already exist.".formatted(registerRequest.getUsername()));
         }
 
         User user = userRepository.save(initializeUser(registerRequest));
 
-        subscriptionService.createDefaultSubscription(user);
-        walletService.createNewWallet(user);
+        Subscription subscription = subscriptionService.createDefaultSubscription(user);
+        Wallet wallet = walletService.createNewWallet(user);
+
+        user.setSubscriptions(List.of(subscription));
+        user.setWallets(List.of(wallet));
 
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(user.getUsername(), user.getId()));
 
@@ -75,9 +80,9 @@ public class UserService {
     }
 
 
-    private User initializeUser(RegisterRequest registerRequest){
+    private User initializeUser(RegisterRequest registerRequest) {
 
-        return   User.builder()
+        return User.builder()
                 .username(registerRequest.getUsername())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
                 .role(UserRole.USER)
@@ -94,7 +99,7 @@ public class UserService {
 
     }
 
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
 
         return userRepository.findAll();
     }

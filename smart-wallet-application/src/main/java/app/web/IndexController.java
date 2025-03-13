@@ -24,47 +24,44 @@ public class IndexController {
     }
 
     @GetMapping("/")
-        public String getIndexPage(){
+    public String getIndexPage() {
 
         return "index";
     }
 
     @GetMapping("/login")
-    public String getLoginPage(){
+    public String getLoginPage() {
 
         return "login";
     }
 
     @GetMapping("/register")
-    public ModelAndView getRegisterPage(){
+    public ModelAndView getRegisterPage() {
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("register");
-        modelAndView.addObject("registerRequest",new RegisterRequest());
+        modelAndView.addObject("registerRequest", new RegisterRequest());
 
         return modelAndView;
     }
 
     @PostMapping("/register")
-    public ModelAndView registerNewUser(@Valid RegisterRequest registerRequest , BindingResult bindingResult){
+    public ModelAndView registerNewUser(@Valid RegisterRequest registerRequest, BindingResult bindingResult) {
 
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             return new ModelAndView("register");
         }
 
-        User registeredUser = userService.register(registerRequest);
+        userService.register(registerRequest);
 
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.setViewName("home");
-        modelAndView.addObject("user",registeredUser);
 
-        return modelAndView;
+        return new ModelAndView("redirect:/home");
     }
 
     @GetMapping("/home")
-    public ModelAndView getHomePage(){
+    public ModelAndView getHomePage() {
 
-        User user = userService.getById(UUID.fromString("fc815143-d8a2-41d2-b1d3-8fff90dede74"));
+        User user = userService.getById(UUID.fromString("e9e64a43-5979-4565-9182-4c4dedef2183"));
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("home");
