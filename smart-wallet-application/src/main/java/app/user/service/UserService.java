@@ -10,6 +10,7 @@ import app.wallet.model.Wallet;
 import app.wallet.service.WalletService;
 import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
+import app.web.dto.UserEditRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class UserService {
 
         Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
 
-        if (optionalUser.isPresent()) {
+        if (optionalUser.isEmpty()) {
             throw new DomainException("Username or password is incorrect.");
         }
 
@@ -77,6 +78,19 @@ public class UserService {
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(user.getUsername(), user.getId()));
 
         return user;
+    }
+
+
+    public void editUserDetails(UUID userId, UserEditRequest userEditRequest) {
+
+        User user = getById(userId);
+
+        user.setFirstName(userEditRequest.getFirstName());
+        user.setLastName(userEditRequest.getLastName());
+        user.setEmail(userEditRequest.getEmail());
+        user.setProfilePicture(userEditRequest.getProfilePicture());
+
+        userRepository.save(user);
     }
 
 

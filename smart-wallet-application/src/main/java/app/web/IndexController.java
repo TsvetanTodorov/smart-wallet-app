@@ -2,6 +2,7 @@ package app.web;
 
 import app.user.model.User;
 import app.user.service.UserService;
+import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,25 @@ public class IndexController {
     }
 
     @GetMapping("/login")
-    public String getLoginPage() {
+    public ModelAndView getLoginPage() {
 
-        return "login";
+        ModelAndView modelAndView = new ModelAndView();
+        modelAndView.setViewName("login");
+        modelAndView.addObject("loginRequest", new LoginRequest());
+
+        return modelAndView;
+    }
+    
+    @PostMapping("/login")
+    public ModelAndView login(@Valid LoginRequest loginRequest, BindingResult bindingResult) {
+
+        if (bindingResult.hasErrors()) {
+            return new ModelAndView("login");
+        }
+
+        userService.login(loginRequest);
+
+        return new ModelAndView("redirect:/home");
     }
 
     @GetMapping("/register")
@@ -54,14 +71,13 @@ public class IndexController {
 
         userService.register(registerRequest);
 
-
         return new ModelAndView("redirect:/home");
     }
 
     @GetMapping("/home")
     public ModelAndView getHomePage() {
 
-        User user = userService.getById(UUID.fromString("e9e64a43-5979-4565-9182-4c4dedef2183"));
+        User user = userService.getById(UUID.fromString("c9073876-e882-4405-a0cc-d2e342444a8f"));
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("home");
