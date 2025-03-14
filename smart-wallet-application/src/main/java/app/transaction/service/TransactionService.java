@@ -27,10 +27,6 @@ public class TransactionService {
     }
 
 
-    public Transaction createNewTransaction() {
-        return null;
-    }
-
     public Transaction createNewTransaction(User owner,
                                             String sender,
                                             String receiver,

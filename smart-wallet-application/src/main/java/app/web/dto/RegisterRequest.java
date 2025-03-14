@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 
 @Builder
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class RegisterRequest {
 
     @Size(min = 6,message = "Username must be at least 6 symbols!")

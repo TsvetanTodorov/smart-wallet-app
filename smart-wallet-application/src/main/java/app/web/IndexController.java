@@ -57,7 +57,7 @@ public class IndexController {
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("register");
-        modelAndView.addObject("registerRequest", new RegisterRequest());
+        modelAndView.addObject("registerRequest", RegisterRequest.builder().build());
 
         return modelAndView;
     }

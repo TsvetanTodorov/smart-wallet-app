@@ -23,7 +23,7 @@ import java.util.UUID;
 @Service
 public class WalletService {
 
-    private static final String SMART_WALLET_SENDER = "Smart Wallet Ltd";
+    private static final String SMART_WALLET_LTD = "Smart Wallet Ltd";
 
     private final WalletRepository walletRepository;
     private final TransactionService transactionService;
@@ -53,7 +53,7 @@ public class WalletService {
 
         if (wallet.getStatus() == WalletStatus.INACTIVE) {
             return transactionService.createNewTransaction(wallet.getOwner(),
-                    SMART_WALLET_SENDER,
+                    SMART_WALLET_LTD,
                     walletId.toString(),
                     amount,
                     wallet.getBalance(),
@@ -70,7 +70,7 @@ public class WalletService {
         walletRepository.save(wallet);
 
         return transactionService.createNewTransaction(wallet.getOwner(),
-                SMART_WALLET_SENDER,
+                SMART_WALLET_LTD,
                 walletId.toString(),
                 amount,
                 wallet.getBalance(),
@@ -78,6 +78,61 @@ public class WalletService {
                 TransactionType.DEPOSIT,
                 TransactionStatus.SUCCEEDED,
                 transactionDescription,
+                null);
+    }
+
+    public Transaction transferFund(){
+
+
+        return null;
+    }
+
+    @Transactional
+    public Transaction charge(User user, UUID walletId, BigDecimal amount, String description ) {
+
+        Wallet wallet = getWalletById(walletId);
+
+        String failureReason = null;
+        boolean isFailedTransaction = false;
+        if(wallet.getStatus() == WalletStatus.INACTIVE) {
+             failureReason = "Inactive wallet status";
+            isFailedTransaction = true;
+        }
+
+        if(wallet.getBalance().compareTo(amount) < 0) {
+            failureReason = "Insufficient funds";
+            isFailedTransaction = true;
+        }
+
+        if(isFailedTransaction){
+            return transactionService.createNewTransaction(
+                    user,
+                    wallet.getId().toString(),
+                    SMART_WALLET_LTD,
+                    amount,
+                    wallet.getBalance(),
+                    wallet.getCurrency(),
+                    TransactionType.WITHDRAW,
+                    TransactionStatus.FAILED,
+                    description,
+                    failureReason);
+        }
+
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+        wallet.setUpdatedOn(LocalDateTime.now());
+
+        walletRepository.save(wallet);
+
+         return transactionService.createNewTransaction(
+                user,
+                wallet.getId().toString(),
+                SMART_WALLET_LTD,
+                amount,
+                wallet.getBalance(),
+                wallet.getCurrency(),
+                TransactionType.WITHDRAW,
+                TransactionStatus.SUCCEEDED,
+                description,
                 null);
     }
 
