@@ -59,4 +59,9 @@ public class TransactionService {
 
        return transactionRepository.findAllByOwnerIdOrderByCreatedOnDesc(ownerId);
     }
+
+    public Transaction getById(UUID id) {
+        return transactionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction with [%s] does not exist.".formatted(id)));
+    }
 }

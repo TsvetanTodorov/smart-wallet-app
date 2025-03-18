@@ -4,6 +4,7 @@ import app.user.model.User;
 import app.user.service.UserService;
 import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,15 +40,16 @@ public class IndexController {
 
         return modelAndView;
     }
-    
+
     @PostMapping("/login")
-    public ModelAndView login(@Valid LoginRequest loginRequest, BindingResult bindingResult) {
+    public ModelAndView login(@Valid LoginRequest loginRequest, BindingResult bindingResult, HttpSession session) {
 
         if (bindingResult.hasErrors()) {
             return new ModelAndView("login");
         }
 
-        userService.login(loginRequest);
+        User loggedInUser = userService.login(loginRequest);
+        session.setAttribute("user_id", loggedInUser.getId());
 
         return new ModelAndView("redirect:/home");
     }
@@ -75,15 +77,25 @@ public class IndexController {
     }
 
     @GetMapping("/home")
-    public ModelAndView getHomePage() {
+    public ModelAndView getHomePage(HttpSession session) {
 
-        User user = userService.getById(UUID.fromString("c9073876-e882-4405-a0cc-d2e342444a8f"));
+        UUID userId = (UUID) session.getAttribute("user_id");
+
+        User user = userService.getById(userId);
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("home");
         modelAndView.addObject("user", user);
 
         return modelAndView;
+    }
+
+    @GetMapping("/logout")
+    public String getLogoutPage(HttpSession session) {
+
+        session.invalidate();
+
+        return "redirect:/";
     }
 
 }

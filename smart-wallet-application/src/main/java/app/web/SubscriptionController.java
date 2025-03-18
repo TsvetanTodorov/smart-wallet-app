@@ -24,15 +24,15 @@ public class SubscriptionController {
 
 
     @GetMapping
-    public String getUpgradePage(){
+    public String getUpgradePage() {
 
         return "upgrade";
     }
 
     @GetMapping("/history")
-    public ModelAndView getSubscriptionHistoryPage(){
+    public ModelAndView getSubscriptionHistoryPage() {
 
-        User user = userService.getById(UUID.fromString("882f7b7d-52c6-4f42-858c-9ac34bcf23ea"));
+        User user = userService.getById(UUID.fromString("fc29cb9f-e346-4fad-95da-a7e981e1ccdf"));
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("subscription-history");

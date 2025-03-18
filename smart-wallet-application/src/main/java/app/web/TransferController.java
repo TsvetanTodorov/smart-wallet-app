@@ -31,9 +31,9 @@ public class TransferController {
 
 
     @GetMapping
-    public ModelAndView getTransferPage(){
+    public ModelAndView getTransferPage() {
 
-        User user = userService.getById(UUID.fromString("c9073876-e882-4405-a0cc-d2e342444a8f"));
+        User user = userService.getById(UUID.fromString("fc29cb9f-e346-4fad-95da-a7e981e1ccdf"));
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("transfer");
@@ -44,11 +44,11 @@ public class TransferController {
     }
 
     @PostMapping
-    public ModelAndView initiateTransfer(@Valid TransferRequest transferRequest, BindingResult bindingResult){
+    public ModelAndView initiateTransfer(@Valid TransferRequest transferRequest, BindingResult bindingResult) {
 
-        User user = userService.getById(UUID.fromString("c9073876-e882-4405-a0cc-d2e342444a8f"));
+        User user = userService.getById(UUID.fromString("fc29cb9f-e346-4fad-95da-a7e981e1ccdf"));
 
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
 
             ModelAndView modelAndView = new ModelAndView();
             modelAndView.setViewName("transfer");
@@ -58,10 +58,8 @@ public class TransferController {
             return modelAndView;
         }
 
-        Transaction transaction = walletService.transferFund();
+        Transaction transaction = walletService.transferFunds(user, transferRequest);
 
-
-        return new ModelAndView("redirect:/transactions");
-
+        return new ModelAndView("redirect:/transactions/ " + transaction.getId());
     }
 }

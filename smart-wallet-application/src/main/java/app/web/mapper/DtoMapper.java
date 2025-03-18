@@ -15,6 +15,5 @@ public class DtoMapper {
                 .email(user.getEmail())
                 .profilePicture(user.getProfilePicture())
                 .build();
-
     }
 }
