@@ -14,7 +14,9 @@ import app.web.dto.RegisterRequest;
 import app.web.dto.UserEditRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -47,22 +49,7 @@ public class UserService implements UserDetailsService {
         this.walletService = walletService;
     }
 
-    public User login(LoginRequest loginRequest) {
-
-        Optional<User> optionalUser = userRepository.findByUsername(loginRequest.getUsername());
-
-        if (optionalUser.isEmpty()) {
-            throw new DomainException("Username or password is incorrect.");
-        }
-
-        User user = optionalUser.get();
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            throw new DomainException("Username or password is incorrect.");
-        }
-
-        return user;
-    }
-
+    @CacheEvict(value= "users", allEntries=true)
     @Transactional
     public User register(RegisterRequest registerRequest) {
 
@@ -74,9 +61,9 @@ public class UserService implements UserDetailsService {
         User user = userRepository.save(initializeUser(registerRequest));
 
         Subscription subscription = subscriptionService.createDefaultSubscription(user);
-        Wallet wallet = walletService.createNewWallet(user);
-
         user.setSubscriptions(List.of(subscription));
+
+        Wallet wallet = walletService.createNewWallet(user);
         user.setWallets(List.of(wallet));
 
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(user.getUsername(), user.getId()));
