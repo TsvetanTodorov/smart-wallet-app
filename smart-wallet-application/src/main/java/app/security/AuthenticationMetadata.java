@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Data
 @Getter
 @AllArgsConstructor
-public class AuthenticationDetails implements UserDetails {
+public class AuthenticationMetadata implements UserDetails {
 
     private UUID userId;
     private String username;
@@ -21,9 +22,15 @@ public class AuthenticationDetails implements UserDetails {
     private UserRole role;
     private boolean isActive;
 
+
+    // Used from Spring Security to understand what roles/authorities the user has
+    //IF USING ROLE MUST HAVE PREFIX ROLE_
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.name());
+
+        return List.of(authority);
     }
 
     @Override
