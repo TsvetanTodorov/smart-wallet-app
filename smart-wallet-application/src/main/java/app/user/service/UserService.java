@@ -1,7 +1,7 @@
 package app.user.service;
 
 import app.exception.DomainException;
-import app.security.AuthenticationDetails;
+import app.security.AuthenticationMetadata;
 import app.subscription.model.Subscription;
 import app.subscription.service.SubscriptionService;
 import app.user.model.User;
@@ -9,12 +9,10 @@ import app.user.model.UserRole;
 import app.user.repository.UserRepository;
 import app.wallet.model.Wallet;
 import app.wallet.service.WalletService;
-import app.web.dto.LoginRequest;
 import app.web.dto.RegisterRequest;
 import app.web.dto.UserEditRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.Cache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -63,7 +61,7 @@ public class UserService implements UserDetailsService {
         Subscription subscription = subscriptionService.createDefaultSubscription(user);
         user.setSubscriptions(List.of(subscription));
 
-        Wallet wallet = walletService.createNewWallet(user);
+        Wallet wallet = walletService.initializeFirstWallet(user);
         user.setWallets(List.of(wallet));
 
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(user.getUsername(), user.getId()));
@@ -136,6 +134,6 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new DomainException("Username with this username does not exist."));
 
-        return new AuthenticationDetails(user.getId(), username, user.getPassword(), user.getRole(), user.isActive());
+        return new AuthenticationMetadata(user.getId(), username, user.getPassword(), user.getRole(), user.isActive());
     }
 }

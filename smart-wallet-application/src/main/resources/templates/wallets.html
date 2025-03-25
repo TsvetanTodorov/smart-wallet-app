@@ -95,7 +95,7 @@
                             </svg>
                         </a>
                     </div>
-                    <div class="func-block admin-func-block">
+                    <div class="func-block admin-func-block" th:if="${user.role.name() == 'ADMIN'}">
                         <span>Admin</span>
                         <a href="/users">
                             <p>Users</p>
@@ -134,14 +134,15 @@
     </div>
     <div class="home-section">
 
-        <div class="wallet-block">
+        <div class="wallet-block" th:each="wallet : ${user.wallets}">
             <div class="default-label-box">
                 <p>Standard Wallet</p>
-                <p class="active-wallet-status">ACTIVE</p>
+                <p th:if="${wallet.status.name() == 'ACTIVE'}" class="active-wallet-status">ACTIVE</p>
+                <p th:if="${wallet.status.name() == 'INACTIVE'}" class="inactive-wallet-status">INACTIVE</p>
             </div>
 
             <div class="wallet-balance">
-                <p class="balance">36.03 EUR</p>
+                <p class="balance"></p>
                 <p class="available-balance-text">Available Balance</p>
             </div>
 
@@ -214,7 +215,8 @@
             </div>
         </div>
 
-        <form class="wallet-block new-wallet" action="/wallets" method="post">
+        <form class="wallet-block new-wallet" th:action="@{/wallets}" th:method="POST"
+              th:if="${(user.subscriptions.get(0).type.name() == 'PREMIUM' && user.wallets.size() < 2) || (user.subscriptions.get(0).type.name() == 'ULTIMATE' && user.wallets.size() < 3) }">
             <button type="submit"></button>
         </form>
 

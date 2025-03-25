@@ -1,11 +1,14 @@
 package app.web;
 
+import app.security.AuthenticationMetadata;
 import app.user.model.User;
 import app.user.service.UserService;
 import app.web.dto.UserEditRequest;
 import app.web.mapper.DtoMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,7 +33,8 @@ public class UserController {
     }
 
     @GetMapping
-    public ModelAndView getAllUsers(Model model) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ModelAndView getAllUsers(@AuthenticationPrincipal AuthenticationMetadata authenticationMetadata) {
 
         List<User> allUsers = userService.getAllUsers();
 
@@ -56,7 +60,7 @@ public class UserController {
 
 
     @PutMapping("/{id}/profile")
-    public ModelAndView updateUserProfile(@PathVariable UUID id, @Valid UserEditRequest userEditRequest, BindingResult bindingResult, Model model) {
+    public ModelAndView updateUserProfile(@PathVariable UUID id, @Valid UserEditRequest userEditRequest, BindingResult bindingResult ) {
 
         if (bindingResult.hasErrors()) {
 
