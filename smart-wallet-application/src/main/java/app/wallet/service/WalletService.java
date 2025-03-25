@@ -1,6 +1,8 @@
 package app.wallet.service;
 
 import app.exception.DomainException;
+import app.subscription.model.Subscription;
+import app.subscription.model.SubscriptionType;
 import app.transaction.model.Transaction;
 import app.transaction.model.TransactionStatus;
 import app.transaction.model.TransactionType;
@@ -11,7 +13,6 @@ import app.wallet.model.WalletStatus;
 import app.wallet.repository.WalletRepository;
 import app.web.dto.TransferRequest;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Currency;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,8 +39,40 @@ public class WalletService {
         this.transactionService = transactionService;
     }
 
+    public void unlockNewWallet(User user){
 
-    public Wallet createNewWallet(User user) {
+        List<Wallet> allUserWallets = walletRepository.findAllByOwnerUsername(user.getUsername());
+        Subscription activeSubscription = user.getSubscriptions().get(0);
+
+        boolean isDefaultPlanAndMaxWalletsUnlocked = activeSubscription.getType() == SubscriptionType.DEFAULT && allUserWallets.size() == 1;
+        boolean isPremiumPlanAndMaxWalletsUnlocked = activeSubscription.getType() == SubscriptionType.PREMIUM && allUserWallets.size() == 2;
+        boolean isUltimatePlanAndMaxWalletsUnlocked = activeSubscription.getType() == SubscriptionType.ULTIMATE && allUserWallets.size() == 3;
+
+        if(isDefaultPlanAndMaxWalletsUnlocked || isPremiumPlanAndMaxWalletsUnlocked || isUltimatePlanAndMaxWalletsUnlocked){
+            throw new DomainException("Max wallet count reached for user with id [%s] and subscription type [%s]."
+                    .formatted(user.getId(), activeSubscription.getType()));
+        }
+
+        Wallet wallet = Wallet.builder()
+                .owner(user)
+                .status(WalletStatus.ACTIVE)
+                .balance(new BigDecimal(0))
+                .currency(Currency.getInstance("EUR"))
+                .createdOn(LocalDateTime.now())
+                .updatedOn(LocalDateTime.now())
+                .build();
+
+        walletRepository.save(wallet);
+    }
+
+
+    public Wallet initializeFirstWallet(User user) {
+
+        List<Wallet> allUserWallets = walletRepository.findAllByOwnerUsername(user.getUsername());
+
+        if(!allUserWallets.isEmpty()){
+            throw new DomainException("User with id = [%s] already has wallets. First wallet can't be initialized.".formatted(user.getId()));
+        }
 
         Wallet wallet = walletRepository.save(initializeWallet(user));
 
