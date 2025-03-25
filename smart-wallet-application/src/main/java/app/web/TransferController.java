@@ -1,12 +1,11 @@
 package app.web;
 
-import app.security.AuthenticationDetails;
+import app.security.AuthenticationMetadata;
 import app.transaction.model.Transaction;
 import app.user.model.User;
 import app.user.service.UserService;
 import app.wallet.service.WalletService;
 import app.web.dto.TransferRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,9 +33,9 @@ public class TransferController {
 
 
     @GetMapping
-    public ModelAndView getTransferPage(@AuthenticationPrincipal AuthenticationDetails authenticationDetails ) {
+    public ModelAndView getTransferPage(@AuthenticationPrincipal AuthenticationMetadata authenticationMetadata) {
 
-        User user = userService.getById(authenticationDetails.getUserId());
+        User user = userService.getById(authenticationMetadata.getUserId());
 
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("transfer");
@@ -47,11 +46,10 @@ public class TransferController {
     }
 
     @PostMapping
-    public ModelAndView initiateTransfer(@Valid TransferRequest transferRequest, BindingResult bindingResult,HttpSession session) {
+    public ModelAndView initiateTransfer(@Valid TransferRequest transferRequest, BindingResult bindingResult,@AuthenticationPrincipal AuthenticationMetadata authenticationMetadata) {
 
-        UUID userId = (UUID) session.getAttribute("user_id");
 
-        User user = userService.getById(userId);
+        User user = userService.getById(authenticationMetadata.getUserId());
 
         if (bindingResult.hasErrors()) {
 
