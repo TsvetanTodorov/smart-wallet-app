@@ -15,14 +15,12 @@ import app.web.dto.TransferRequest;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Currency;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -230,5 +228,36 @@ public class WalletService {
                 .createdOn(LocalDateTime.now())
                 .updatedOn(LocalDateTime.now())
                 .build();
+    }
+
+    public Map<UUID, List<Transaction>> getLastFourTransactions(List<Wallet> wallets) {
+
+        Map<UUID, List<Transaction>> transactionsByWalletId = new LinkedHashMap<>();
+
+        for (Wallet wallet : wallets) {
+
+            List<Transaction> lastFourTransactions = transactionService.getLastFourTransactionsByWallet(wallet);
+            transactionsByWalletId.put(wallet.getId(), lastFourTransactions);
+        }
+
+        return transactionsByWalletId;
+    }
+
+    public void switchStatus(UUID walletId, UUID ownerId) {
+
+        Optional<Wallet> optionalWallet = walletRepository.findByIdAndOwnerId(walletId, ownerId);
+
+        if(optionalWallet.isEmpty()) {
+            throw new DomainException("Wallet with id [%s] does not belong to user with id [%s].".formatted(walletId, ownerId));
+        }
+
+        Wallet wallet = optionalWallet.get();
+        if (wallet.getStatus() == WalletStatus.ACTIVE){
+            wallet.setStatus(WalletStatus.INACTIVE);
+        }else{
+            wallet.setStatus(WalletStatus.ACTIVE);
+        }
+
+        walletRepository.save(wallet);
     }
 }
