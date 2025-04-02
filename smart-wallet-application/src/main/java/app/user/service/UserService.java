@@ -1,6 +1,8 @@
 package app.user.service;
 
 import app.exception.DomainException;
+import app.exception.UsernameAlreadyExistException;
+import app.notification.service.NotificationService;
 import app.security.AuthenticationMetadata;
 import app.subscription.model.Subscription;
 import app.subscription.service.SubscriptionService;
@@ -34,17 +36,20 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final SubscriptionService subscriptionService;
     private final WalletService walletService;
+    private final NotificationService notificationService;
 
     @Autowired
     public UserService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        SubscriptionService subscriptionService,
-                       WalletService walletService) {
+                       WalletService walletService,
+                       NotificationService notificationService) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.subscriptionService = subscriptionService;
         this.walletService = walletService;
+        this.notificationService = notificationService;
     }
 
     @CacheEvict(value= "users", allEntries=true)
@@ -53,7 +58,7 @@ public class UserService implements UserDetailsService {
 
         Optional<User> optionalUser = userRepository.findByUsername(registerRequest.getUsername());
         if (optionalUser.isPresent()) {
-            throw new DomainException("Username [%s] already exist.".formatted(registerRequest.getUsername()));
+            throw new UsernameAlreadyExistException("Username [%s] already exist.".formatted(registerRequest.getUsername()));
         }
 
         User user = userRepository.save(initializeUser(registerRequest));
@@ -63,6 +68,8 @@ public class UserService implements UserDetailsService {
 
         Wallet wallet = walletService.initializeFirstWallet(user);
         user.setWallets(List.of(wallet));
+
+        notificationService.saveNotificationPreference(user.getId(),false,null);
 
         log.info("Successfully created new user account for username [%s] and id [%s]".formatted(user.getUsername(), user.getId()));
 
@@ -115,6 +122,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @CacheEvict(value = "users", allEntries = true)
     public void switchRole(UUID userId) {
 
         User user = getById(userId);
